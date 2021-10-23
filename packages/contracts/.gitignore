@@ -1,3 +1,7 @@
-.next
 node_modules
-.DS_Store
+
+cache
+artifacts
+typechain
+
+dist
