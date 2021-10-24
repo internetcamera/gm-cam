@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { Greeter__factory } from '../typechain';
+import { GmCam__factory } from '../typechain';
 
 async function start() {
   const args = require('minimist')(process.argv.slice(2));
@@ -26,12 +26,12 @@ async function start() {
     );
 
   if (!addressBook.greeter) {
-    console.log('Deploying Greeter...');
-    const deployTxGreeter = await new Greeter__factory(wallet).deploy('Hello!');
-    console.log('Deploy TX: ', deployTxGreeter.deployTransaction.hash);
-    await deployTxGreeter.deployed();
-    console.log('Greeter deployed at ', deployTxGreeter.address);
-    addressBook.greeter = deployTxGreeter.address;
+    console.log('Deploying gmCam...');
+    const deployTx = await new GmCam__factory(wallet).deploy();
+    console.log('Deploy TX: ', deployTx.deployTransaction.hash);
+    await deployTx.deployed();
+    console.log('gmCam deployed at ', deployTx.address);
+    addressBook.gmCam = deployTx.address;
     await fs.writeFile(addressesPath, JSON.stringify(addressBook, null, 2));
   }
 
