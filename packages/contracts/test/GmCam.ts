@@ -26,14 +26,12 @@ describe('GmCam', function () {
   // * CONSTRUCTOR * //
   it('should deploy and mint 100 film to deployer', async function () {
     await expect(await gmCamContract.owner()).to.equal(addresses[0]);
-    await expect(await gmCamContract.balanceOf(addresses[0])).to.equal(100);
+    await expect(await gmCamContract.filmBalances(addresses[0])).to.equal(100);
   });
 
   it('should have pre-constructed film default to empty data', async function () {
     const gmData = await gmCamContract.gmData(1);
-    await expect(gmData.originalOwner).to.equal(
-      '0x0000000000000000000000000000000000000000'
-    );
+    await expect(gmData.originalOwner).to.equal(addresses[0]);
     await expect(
       Math.abs(
         gmData.expiresAt.toNumber() - deployTime.add(36500, 'day').unix()
@@ -53,8 +51,9 @@ describe('GmCam', function () {
       .fulfilled;
 
     // ensure balances change correctly
-    await expect(await gmCamContract.balanceOf(addresses[0])).to.equal(99);
-    await expect(await gmCamContract.balanceOf(addresses[1])).to.equal(1);
+    await expect(await gmCamContract.filmBalances(addresses[0])).to.equal(99); // FILM
+    await expect(await gmCamContract.filmBalances(addresses[1])).to.equal(0); // FILM
+    await expect(await gmCamContract.balanceOf(addresses[1])).to.equal(1); // ERC721
 
     // ensure player 2 gets expected gm tokenId
     await expect(await gmCamContract.ownerOf(1)).to.equal(addresses[1]);
@@ -81,7 +80,7 @@ describe('GmCam', function () {
   it('shouldnt allow someone to update or re-send an already sent gm', async function () {
     await expect(
       gmCamContract.connect(accounts[1]).sendGM(1, addresses[1], 'photoB')
-    ).eventually.rejectedWith(makeVMErrorMessage('film already has been used'));
+    ).eventually.rejectedWith(makeVMErrorMessage('token already minted'));
     await expect(await gmCamContract.tokenURI(1)).to.equal('ipfs://photoA');
   });
 
@@ -89,12 +88,31 @@ describe('GmCam', function () {
     await expect(gmCamContract.connect(accounts[1]).sendGMBack(1, 'photoB')).to
       .eventually.fulfilled;
 
-    await expect(await gmCamContract.balanceOf(addresses[0])).to.equal(100 + 5);
-    await expect(await gmCamContract.balanceOf(addresses[1])).to.equal(1 + 5);
+    await expect(await gmCamContract.filmBalances(addresses[0])).to.equal(
+      99 + 5
+    ); // FILM
+    await expect(await gmCamContract.balanceOf(addresses[0])).to.equal(1); // ERC721
+    await expect(await gmCamContract.filmBalances(addresses[1])).to.equal(5); // FILM
+    await expect(await gmCamContract.balanceOf(addresses[1])).to.equal(1); // ERC721
 
-    await expect(await gmCamContract.ownerOf(101)).to.equal(addresses[0]);
-    await expect(await gmCamContract.ownerOf(102)).to.equal(addresses[0]);
-    await expect(await gmCamContract.ownerOf(103)).to.equal(addresses[1]);
+    await expect(
+      await (
+        await gmCamContract.gmData(101)
+      ).originalOwner
+    ).to.equal(addresses[1]);
+    await expect(await (await gmCamContract.gmData(1)).originalOwner).to.equal(
+      addresses[0]
+    );
+    await expect(
+      await (
+        await gmCamContract.gmData(102)
+      ).originalOwner
+    ).to.equal(addresses[0]);
+    await expect(
+      await (
+        await gmCamContract.gmData(103)
+      ).originalOwner
+    ).to.equal(addresses[1]);
 
     const gmData1 = await gmCamContract.gmData(1);
     const gmData101 = await gmCamContract.gmData(101);
@@ -114,7 +132,7 @@ describe('GmCam', function () {
   it('shouldnt allow anyone to send or reply to a completed gm', async function () {
     await expect(
       gmCamContract.sendGM(101, addresses[1], 'photoA')
-    ).eventually.rejectedWith(makeVMErrorMessage('this film is completed'));
+    ).eventually.rejectedWith(makeVMErrorMessage('token already minted'));
     await expect(
       gmCamContract.connect(accounts[1]).sendGMBack(1, 'photoC')
     ).eventually.rejectedWith(makeVMErrorMessage('this film is completed'));
@@ -136,7 +154,20 @@ describe('GmCam', function () {
       .fulfilled;
     await expect(
       gmCamContract.connect(accounts[5]).sendGMBack(2, 'photoC')
-    ).eventually.rejectedWith(makeVMErrorMessage('you do not own this film'));
+    ).eventually.rejectedWith(makeVMErrorMessage('you do not own this gm'));
+  });
+
+  it('shouldnt allow address to overspend', async function () {
+    for (var i = 0; i < 5; i++) {
+      await expect(
+        gmCamContract
+          .connect(accounts[1])
+          .sendGM(103 + i * 2, addresses[i + 10], 'photo')
+      ).eventually.fulfilled;
+    }
+    await expect(await gmCamContract.filmBalances(addresses[1])).to.equal(0);
+    await expect(gmCamContract.sendGM(113, addresses[11], 'photoA')).eventually
+      .rejected;
   });
 
   it('shouldnt allow expired film to be used', async function () {
@@ -144,6 +175,18 @@ describe('GmCam', function () {
     await expect(
       gmCamContract.sendGM(102, addresses[1], 'photoA')
     ).eventually.rejectedWith(makeVMErrorMessage('this film is expired'));
+  });
+
+  it('should allow burning of expired film', async function () {
+    await expect(gmCamContract.burnExpired([1, 102, 103, 104])).eventually
+      .fulfilled;
+    await expect(await gmCamContract.ownerOf(1)).to.equal(addresses[1]);
+    await expect(gmCamContract.ownerOf(102)).eventually.rejectedWith(
+      makeVMErrorMessage('ERC721: owner query for nonexistent token')
+    );
+    await expect((await gmCamContract.gmData(102)).originalOwner).to.equal(
+      '0x0000000000000000000000000000000000000000'
+    );
   });
 });
 
