@@ -6,10 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract GmCam is ERC721, Ownable {
-    uint256 private _tokenIdCounter;
-
+    // * MODELS * //
     // TODO: handle intermediary owners (player3/different wallet situation)
-
     struct TokenData {
         address originalOwner;
         uint256 expiresAt;
@@ -19,8 +17,11 @@ contract GmCam is ERC721, Ownable {
         bool isCompleted; // tokenUri will be conditional on this
     }
 
+    // * STORAGE * //
+    uint256 private _tokenIdCounter;
     mapping(uint256 => TokenData) public gmData;
 
+    // * CONSTRUCTOR * //
     constructor() ERC721("GMPhotos", "GM") {
         for (uint256 i = 1; i <= 100; i++) {
             _mint(msg.sender, i);
@@ -29,15 +30,7 @@ contract GmCam is ERC721, Ownable {
         _tokenIdCounter = 100;
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
-    }
-
+    // * PUBLIC GM FUNCTIONS * //
     function sendGM(
         uint256 gmTokenId,
         address to,
@@ -46,13 +39,10 @@ contract GmCam is ERC721, Ownable {
     ) public {
         require(_exists(gmTokenId), "film does not exist");
         require(ownerOf(gmTokenId) == msg.sender, "you do not own this film");
-
-        // check expiriation
         require(
             gmData[gmTokenId].expiresAt > block.timestamp,
             "this film is expired"
         );
-
         require(
             gmData[gmTokenId].isCompleted != true,
             "this film is completed"
@@ -71,6 +61,10 @@ contract GmCam is ERC721, Ownable {
         public
     {
         require(_exists(senderGmTokenId), "film does not exist");
+        require(
+            ownerOf(senderGmTokenId) == msg.sender,
+            "you do not own this film"
+        );
         require(
             gmData[senderGmTokenId].isCompleted != true,
             "this film is completed"
@@ -94,15 +88,22 @@ contract GmCam is ERC721, Ownable {
         for (uint256 i = 0; i < 5; i++) {
             _tokenIdCounter++;
             _safeMint(player1, _tokenIdCounter);
-
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
         }
-
         for (uint256 i = 0; i < 5; i++) {
             _tokenIdCounter++;
             _safeMint(player2, _tokenIdCounter);
-
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
         }
+    }
+
+    // * ERC721 OVERRIDES * //
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
     }
 }
