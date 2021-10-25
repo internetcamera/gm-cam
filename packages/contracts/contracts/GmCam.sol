@@ -7,13 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract GmCam is ERC721, Ownable {
     // * MODELS * //
-    // TODO: handle intermediary owners (player3/different wallet situation)
     struct TokenData {
-        address originalOwner;
+        address originalOwner; // this allows sendGMBack to send back to the original owner
         uint256 expiresAt;
-        // uint256 partnerTokenId; // player1 <-> player2
-        string pendingPhotoIpfsHash;
-        string completedPhotoIpfsHash;
+        uint256 partnerTokenId; // player1 <-> player2
+        string ipfsHash;
         bool isCompleted; // tokenUri will be conditional on this
     }
 
@@ -34,30 +32,33 @@ contract GmCam is ERC721, Ownable {
     function sendGM(
         uint256 gmTokenId,
         address to,
-        string calldata pendingPhotoIpfsHash,
-        string calldata completedPhotoIpfsHash
+        string calldata ipfsHash
     ) public {
         require(_exists(gmTokenId), "film does not exist");
         require(ownerOf(gmTokenId) == msg.sender, "you do not own this film");
         require(
-            gmData[gmTokenId].expiresAt > block.timestamp,
-            "this film is expired"
-        );
-        require(
             gmData[gmTokenId].isCompleted != true,
             "this film is completed"
         );
-        //TODO: require(gmData[gmTokenId].pendingPhotoIpfsHash.length() == 0, "film already contains a photo");
+        require(bytes(ipfsHash).length > 0, "ipfsHash cant be blank");
+        require(
+            bytes(gmData[gmTokenId].ipfsHash).length == 0,
+            "film already has been used"
+        );
+        require(to != msg.sender, "cant send to yourself");
+        require(
+            gmData[gmTokenId].expiresAt > block.timestamp,
+            "this film is expired"
+        );
 
-        gmData[gmTokenId].pendingPhotoIpfsHash = pendingPhotoIpfsHash;
-        gmData[gmTokenId].completedPhotoIpfsHash = completedPhotoIpfsHash;
+        gmData[gmTokenId].ipfsHash = ipfsHash;
         gmData[gmTokenId].expiresAt = block.timestamp + 1 days;
         gmData[gmTokenId].originalOwner = msg.sender;
 
         safeTransferFrom(ownerOf(gmTokenId), to, gmTokenId, "");
     }
 
-    function sendGMBack(uint256 senderGmTokenId, string calldata replyIpfsHash)
+    function sendGMBack(uint256 senderGmTokenId, string calldata ipfsHash)
         public
     {
         require(_exists(senderGmTokenId), "film does not exist");
@@ -78,10 +79,14 @@ contract GmCam is ERC721, Ownable {
         address player2 = msg.sender;
 
         _tokenIdCounter++;
-        _safeMint(gmData[senderGmTokenId].originalOwner, _tokenIdCounter);
-        gmData[_tokenIdCounter].completedPhotoIpfsHash = replyIpfsHash;
+        _safeMint(player1, _tokenIdCounter);
+
+        gmData[_tokenIdCounter].ipfsHash = ipfsHash;
+        gmData[_tokenIdCounter].originalOwner = msg.sender;
+        gmData[_tokenIdCounter].partnerTokenId = senderGmTokenId;
         gmData[_tokenIdCounter].isCompleted = true;
 
+        gmData[senderGmTokenId].partnerTokenId = _tokenIdCounter;
         gmData[senderGmTokenId].isCompleted = true;
 
         // send 5 gms to each player
@@ -89,8 +94,6 @@ contract GmCam is ERC721, Ownable {
             _tokenIdCounter++;
             _safeMint(player1, _tokenIdCounter);
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
-        }
-        for (uint256 i = 0; i < 5; i++) {
             _tokenIdCounter++;
             _safeMint(player2, _tokenIdCounter);
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
@@ -104,6 +107,16 @@ contract GmCam is ERC721, Ownable {
         override
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        return string(abi.encodePacked("ipfs://", gmData[tokenId].ipfsHash));
+    }
+
+    // TODO?: override beforeTokenTransfer to update originalOwner ?
+
+    function getTime() public view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function getBlockNumber() public view returns (uint256) {
+        return block.number;
     }
 }
