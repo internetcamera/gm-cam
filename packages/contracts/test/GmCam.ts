@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import { BigNumber, Signer } from 'ethers';
 import { expect } from 'chai';
 import { GmCam, GmCam__factory } from '../typechain';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 //@ts-ignore
@@ -12,12 +12,14 @@ describe('GmCam', function () {
   let accounts: Signer[] = [];
   let addresses: string[] = [];
   let gmCamContract: GmCam;
+  let deployTime: Dayjs;
 
   this.beforeAll(async () => {
     accounts = await ethers.getSigners();
     addresses = await Promise.all(accounts.map(signer => signer.getAddress()));
     const GmCam = await ethers.getContractFactory('GmCam');
     gmCamContract = (await GmCam.deploy()) as GmCam;
+    deployTime = dayjs();
     await gmCamContract.deployed();
   });
 
@@ -32,9 +34,12 @@ describe('GmCam', function () {
     await expect(gmData[0]).to.equal(
       '0x0000000000000000000000000000000000000000'
     );
-    await expect(gmData[1].toNumber()).to.equal(
-      dayjs().add(36500, 'days').unix()
-    );
+    await expect(
+      Math.abs(gmData[1].toNumber() - deployTime.add(36500, 'day').unix())
+    )
+      .to.be.lessThanOrEqual(1)
+      .and.greaterThanOrEqual(0);
+
     await expect(gmData[2]).to.equal('');
     await expect(gmData[3]).to.equal('');
     await expect(gmData[4]).to.equal(false);
