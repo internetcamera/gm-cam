@@ -1,6 +1,7 @@
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-etherscan';
 import { task } from 'hardhat/config';
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -23,5 +24,14 @@ export default {
   solidity: '0.8.4',
   mocha: {
     timeout: 60 * 1000
+  },
+  networks: {
+    mumbai: {
+      chainId: 80001,
+      url: require('dotenv').config({ path: '.env.80001' }).parsed.RPC_ENDPOINT
+    }
+  },
+  etherscan: {
+    apiKey: 'KZ9KA8WH63FHJYFVYCWN7DH7KGBKF3NQ6I'
   }
 };
