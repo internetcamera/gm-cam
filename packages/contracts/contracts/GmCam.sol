@@ -19,6 +19,13 @@ contract GmCam is ERC721, Ownable {
         uint256 indexed tokenId,
         uint256 expiresAt
     );
+    event GMCreated(
+        uint256 indexed tokenId,
+        address indexed from,
+        address indexed to,
+        uint256 expiresAt
+    );
+    event GMCompleted(uint256 indexed gm1TokenId, uint256 indexed gm2TokenId);
 
     // * STORAGE * //
     uint256 private _tokenIdCounter;
@@ -63,8 +70,8 @@ contract GmCam is ERC721, Ownable {
         gmData[gmTokenId].originalOwner = msg.sender;
         filmBalances[msg.sender] -= 1;
 
-        // safeTransferFrom(ownerOf(gmTokenId), to, gmTokenId, "");
         _safeMint(to, gmTokenId);
+        emit GMCreated(gmTokenId, msg.sender, to, gmData[gmTokenId].expiresAt);
     }
 
     function sendGMBack(uint256 senderGmTokenId, string calldata ipfsHash)
@@ -97,11 +104,11 @@ contract GmCam is ERC721, Ownable {
 
         gmData[senderGmTokenId].partnerTokenId = _tokenIdCounter;
         gmData[senderGmTokenId].isCompleted = true;
+        emit GMCompleted(senderGmTokenId, _tokenIdCounter);
 
         // send 5 gms to each player
         for (uint256 i = 0; i < 5; i++) {
             _tokenIdCounter++;
-            // _safeMint(player1, _tokenIdCounter);
             gmData[_tokenIdCounter].originalOwner = player1;
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
             filmBalances[player1] += 1;
@@ -111,7 +118,6 @@ contract GmCam is ERC721, Ownable {
                 gmData[_tokenIdCounter].expiresAt
             );
             _tokenIdCounter++;
-            // _safeMint(player2, _tokenIdCounter);
             gmData[_tokenIdCounter].originalOwner = player2;
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
             filmBalances[player2] += 1;

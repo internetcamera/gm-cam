@@ -1,0 +1,19 @@
+type GM @entity {
+  id: ID!
+  expiresAt: BigInt!
+  ipfsHash: String
+  originalOwner: Wallet!
+  partner: GM
+  createdAt: BigInt
+}
+
+type GMPair @entity {
+  id: ID!
+  gm1: GM!
+  gm2: GM
+  isCompleted: Boolean!
+}
+
+type Wallet @entity {
+  id: ID!
+}
