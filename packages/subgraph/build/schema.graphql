@@ -16,4 +16,6 @@ type GMPair @entity {
 
 type Wallet @entity {
   id: ID!
+
+  gms: [GM!]! @derivedFrom(field: "originalOwner")
 }
