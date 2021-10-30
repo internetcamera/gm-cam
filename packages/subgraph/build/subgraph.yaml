@@ -1,0 +1,32 @@
+specVersion: 0.0.2
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: GmCam
+    network: mumbai
+    source:
+      address: "0xA7cb9DF5E5992696dCd14A48A48317f1edc67d44"
+      abi: GmCam
+      startBlock: 20799517
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - FilmCreated
+        - OwnershipTransferred
+        - Transfer
+      abis:
+        - name: GmCam
+          file: GmCam/abis/GmCam.json
+      eventHandlers:
+        - event: FilmCreated(indexed address,indexed uint256,uint256)
+          handler: handleFilmCreated
+        - event: GMCreated(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleGMCreated
+        - event: GMCompleted(indexed uint256,indexed uint256)
+          handler: handleGMCompleted
+      file: GmCam/GmCam.wasm

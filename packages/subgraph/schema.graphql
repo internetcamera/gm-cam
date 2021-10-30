@@ -1,0 +1,30 @@
+enum GMState {
+  FILM
+  INITIATED
+  COMPLETED
+}
+
+type GM @entity {
+  id: ID!
+  expiresAt: BigInt!
+  ipfsHash: String
+  originalOwner: Wallet!
+  currentOwner: Wallet!
+  partner: GM
+  state: GMState!
+  createdAt: BigInt
+}
+
+type GMPair @entity {
+  id: ID!
+  gm1: GM!
+  wallet1: Wallet!
+  gm2: GM
+  wallet2: Wallet
+  isCompleted: Boolean!
+}
+
+type Wallet @entity {
+  id: ID!
+  gms: [GM!]! @derivedFrom(field: "currentOwner")
+}
