@@ -1,9 +1,17 @@
+enum GMState {
+  FILM
+  INITIATED
+  COMPLETED
+}
+
 type GM @entity {
   id: ID!
   expiresAt: BigInt!
   ipfsHash: String
   originalOwner: Wallet!
+  currentOwner: Wallet!
   partner: GM
+  state: GMState!
   createdAt: BigInt
 }
 

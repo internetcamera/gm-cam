@@ -77,6 +77,15 @@ export class GM extends Entity {
     this.set("originalOwner", Value.fromString(value));
   }
 
+  get currentOwner(): string {
+    let value = this.get("currentOwner");
+    return value.toString();
+  }
+
+  set currentOwner(value: string) {
+    this.set("currentOwner", Value.fromString(value));
+  }
+
   get partner(): string | null {
     let value = this.get("partner");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -92,6 +101,15 @@ export class GM extends Entity {
     } else {
       this.set("partner", Value.fromString(value as string));
     }
+  }
+
+  get state(): string {
+    let value = this.get("state");
+    return value.toString();
+  }
+
+  set state(value: string) {
+    this.set("state", Value.fromString(value));
   }
 
   get createdAt(): BigInt | null {
