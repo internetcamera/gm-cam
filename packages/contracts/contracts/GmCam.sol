@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./utils/TrustedForwarderRecipient.sol";
 
-contract GmCam is ERC721, Ownable {
+contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     // * MODELS * //
     struct TokenData {
         address originalOwner; // this allows sendGMBack to send back to the original owner
@@ -26,11 +27,15 @@ contract GmCam is ERC721, Ownable {
     mapping(address => uint256) public filmBalances;
 
     // * CONSTRUCTOR * //
-    constructor() ERC721("GMPhotos", "GM") {
+    constructor(address trustedForwarderAddress_)
+        ERC721("GMPhotos", "GM")
+        TrustedForwarderRecipient(trustedForwarderAddress_)
+    {
+        address msgSender = _msgSender();
         for (uint256 i = 1; i <= 100; i++) {
-            gmData[i].originalOwner = msg.sender;
+            gmData[i].originalOwner = msgSender;
             gmData[i].expiresAt = block.timestamp + (100 * 365 days);
-            filmBalances[msg.sender] += 1;
+            filmBalances[msgSender] += 1;
             emit FilmCreated(gmData[i].originalOwner, i, gmData[i].expiresAt);
         }
         _tokenIdCounter = 100;
@@ -42,9 +47,10 @@ contract GmCam is ERC721, Ownable {
         address to,
         string calldata ipfsHash
     ) public {
+        address msgSender = _msgSender();
         require(!_exists(gmTokenId), "token already minted");
         require(
-            gmData[gmTokenId].originalOwner == msg.sender,
+            gmData[gmTokenId].originalOwner == msgSender,
             "you do not own this film"
         );
         require(
@@ -52,7 +58,7 @@ contract GmCam is ERC721, Ownable {
             "this film is completed"
         );
         require(bytes(ipfsHash).length > 0, "ipfsHash cant be blank");
-        require(to != msg.sender, "cant send to yourself");
+        require(to != msgSender, "cant send to yourself");
         require(
             gmData[gmTokenId].expiresAt > block.timestamp,
             "this film is expired"
@@ -60,8 +66,8 @@ contract GmCam is ERC721, Ownable {
 
         gmData[gmTokenId].ipfsHash = ipfsHash;
         gmData[gmTokenId].expiresAt = block.timestamp + 1 days;
-        gmData[gmTokenId].originalOwner = msg.sender;
-        filmBalances[msg.sender] -= 1;
+        gmData[gmTokenId].originalOwner = msgSender;
+        filmBalances[msgSender] -= 1;
 
         // safeTransferFrom(ownerOf(gmTokenId), to, gmTokenId, "");
         _safeMint(to, gmTokenId);
@@ -70,9 +76,10 @@ contract GmCam is ERC721, Ownable {
     function sendGMBack(uint256 senderGmTokenId, string calldata ipfsHash)
         public
     {
+        address msgSender = _msgSender();
         require(_exists(senderGmTokenId), "gm does not exist");
         require(
-            ownerOf(senderGmTokenId) == msg.sender,
+            ownerOf(senderGmTokenId) == msgSender,
             "you do not own this gm"
         );
         require(
@@ -85,13 +92,13 @@ contract GmCam is ERC721, Ownable {
         );
 
         address player1 = gmData[senderGmTokenId].originalOwner;
-        address player2 = msg.sender;
+        address player2 = msgSender;
 
         _tokenIdCounter++;
         _safeMint(player1, _tokenIdCounter);
 
         gmData[_tokenIdCounter].ipfsHash = ipfsHash;
-        gmData[_tokenIdCounter].originalOwner = msg.sender;
+        gmData[_tokenIdCounter].originalOwner = msgSender;
         gmData[_tokenIdCounter].partnerTokenId = senderGmTokenId;
         gmData[_tokenIdCounter].isCompleted = true;
 
@@ -146,5 +153,24 @@ contract GmCam is ERC721, Ownable {
                 if (_exists(tokenId)) _burn(tokenId);
             }
         }
+    }
+
+    // * Overrides for Context / Trusted Forwarder * //
+    function _msgSender()
+        internal
+        view
+        override(Context, TrustedForwarderRecipient)
+        returns (address)
+    {
+        return super._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(Context, TrustedForwarderRecipient)
+        returns (bytes memory ret)
+    {
+        return super._msgData();
     }
 }
