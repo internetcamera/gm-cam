@@ -10,12 +10,13 @@ type GM @entity {
 type GMPair @entity {
   id: ID!
   gm1: GM!
+  wallet1: Wallet!
   gm2: GM
+  wallet2: Wallet
   isCompleted: Boolean!
 }
 
 type Wallet @entity {
   id: ID!
-
   gms: [GM!]! @derivedFrom(field: "originalOwner")
 }

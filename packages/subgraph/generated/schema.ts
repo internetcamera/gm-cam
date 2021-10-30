@@ -151,6 +151,15 @@ export class GMPair extends Entity {
     this.set("gm1", Value.fromString(value));
   }
 
+  get wallet1(): string {
+    let value = this.get("wallet1");
+    return value.toString();
+  }
+
+  set wallet1(value: string) {
+    this.set("wallet1", Value.fromString(value));
+  }
+
   get gm2(): string | null {
     let value = this.get("gm2");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -165,6 +174,23 @@ export class GMPair extends Entity {
       this.unset("gm2");
     } else {
       this.set("gm2", Value.fromString(value as string));
+    }
+  }
+
+  get wallet2(): string | null {
+    let value = this.get("wallet2");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set wallet2(value: string | null) {
+    if (value === null) {
+      this.unset("wallet2");
+    } else {
+      this.set("wallet2", Value.fromString(value as string));
     }
   }
 
@@ -206,5 +232,14 @@ export class Wallet extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get gms(): Array<string> {
+    let value = this.get("gms");
+    return value.toStringArray();
+  }
+
+  set gms(value: Array<string>) {
+    this.set("gms", Value.fromStringArray(value));
   }
 }
