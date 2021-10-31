@@ -6,7 +6,7 @@ dataSources:
     name: GmCam
     network: mumbai
     source:
-      address: "0x4c057ff04054a0bc31f4Fe17142802a1e30DF617"
+      address: "0xD1607A9Ddc6dEf66E6924E7064bC792fF57d5f50"
       abi: GmCam
       startBlock: 20799517
     mapping:

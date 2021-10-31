@@ -77,7 +77,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         filmBalances[msgSender] -= 1;
 
         _safeMint(to, gmTokenId);
-        emit GMCreated(gmTokenId, msg.sender, to, gmData[gmTokenId].expiresAt);
+        emit GMCreated(gmTokenId, msgSender, to, gmData[gmTokenId].expiresAt);
     }
 
     function sendGMBack(uint256 senderGmTokenId, string calldata ipfsHash)
