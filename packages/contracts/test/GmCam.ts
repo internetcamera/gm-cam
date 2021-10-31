@@ -18,7 +18,9 @@ describe('GmCam', function () {
     accounts = await ethers.getSigners();
     addresses = await Promise.all(accounts.map(signer => signer.getAddress()));
     const GmCam = await ethers.getContractFactory('GmCam');
-    gmCamContract = (await GmCam.deploy()) as GmCam;
+    gmCamContract = (await GmCam.deploy(
+      '0x0000000000000000000000000000000000000000'
+    )) as GmCam;
     deployTime = dayjs();
     await gmCamContract.deployed();
   });
