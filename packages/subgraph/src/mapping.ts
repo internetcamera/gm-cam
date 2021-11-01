@@ -55,27 +55,28 @@ export function handleGMCompleted(event: GMCompleted): void {
 
   let gm2Data = contract.gmData(event.params.gm2TokenId);
   let gm2Sender = new Wallet(gm2Data.value0.toHexString());
-  gm2.sender = gm2Sender.id;
   gm2Sender.save();
 
   let gm2Recipient = new Wallet(
     contract.ownerOf(event.params.gm2TokenId).toHexString()
   );
   gm2Recipient.save();
-  gm2.recipient = gm2Recipient.id;
 
+  gm2.sender = gm2Sender.id;
+  gm2.recipient = gm2Recipient.id;
   gm2.expiresAt = gm2Data.value1;
   gm2.partner = gm1.id;
   gm2.partner = gm2.ipfsHash = gm2Data.value3;
   gm2.ipfsHash = gm2Data.value3;
   gm2.createdAt = event.block.timestamp;
+  gm2.state = 'COMPLETED';
+  gm2.save();
 
   gm1.partner = gm2.id;
+  gm1.state = 'COMPLETED';
+  gm1.save();
+
   gmPair.gm2 = gm2.id;
   gmPair.isCompleted = true;
-  gm1.state = 'COMPLETED';
-  gm2.state = 'COMPLETED';
-  gm1.save();
-  gm2.save();
   gmPair.save();
 }
