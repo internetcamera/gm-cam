@@ -24,6 +24,7 @@ type GMPair @entity {
   id: ID!
   gm1: GM!
   gm2: GM
+  wallets: [Wallet!]!
   isCompleted: Boolean!
 }
 

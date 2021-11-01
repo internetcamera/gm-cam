@@ -235,6 +235,15 @@ export class GMPair extends Entity {
     }
   }
 
+  get wallets(): Array<string> {
+    let value = this.get("wallets");
+    return value.toStringArray();
+  }
+
+  set wallets(value: Array<string>) {
+    this.set("wallets", Value.fromStringArray(value));
+  }
+
   get isCompleted(): boolean {
     let value = this.get("isCompleted");
     return value.toBoolean();
