@@ -44,7 +44,7 @@ export function handleGMCreated(event: GMCreated): void {
   let gmPair = new GMPair(gm.id);
   gmPair.gm1 = gm.id;
   gmPair.isCompleted = false;
-  gmPair.wallets = [sender.id];
+  gmPair.wallets = [sender.id, recipient.id];
   gmPair.save();
 }
 
