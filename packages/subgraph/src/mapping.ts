@@ -49,24 +49,22 @@ export function handleGMCreated(event: GMCreated): void {
 
 export function handleGMCompleted(event: GMCompleted): void {
   let contract = GmCam.bind(event.address);
-  let gm1 = GM.load(event.params.gm1TokenId.toString());
-  let gm2 = new GM(event.params.gm2TokenId.toString());
-  let gmPair = GMPair.load(gm1.id);
 
   let gm2Data = contract.gmData(event.params.gm2TokenId);
   let gm2Sender = new Wallet(gm2Data.value0.toHexString());
   gm2Sender.save();
-
   let gm2Recipient = new Wallet(
     contract.ownerOf(event.params.gm2TokenId).toHexString()
   );
   gm2Recipient.save();
 
+  let gm1 = GM.load(event.params.gm1TokenId.toString());
+  let gm2 = new GM(event.params.gm2TokenId.toString());
+
   gm2.sender = gm2Sender.id;
   gm2.recipient = gm2Recipient.id;
   gm2.expiresAt = gm2Data.value1;
   gm2.partner = gm1.id;
-  gm2.partner = gm2.ipfsHash = gm2Data.value3;
   gm2.ipfsHash = gm2Data.value3;
   gm2.createdAt = event.block.timestamp;
   gm2.state = 'COMPLETED';
@@ -76,6 +74,7 @@ export function handleGMCompleted(event: GMCompleted): void {
   gm1.state = 'COMPLETED';
   gm1.save();
 
+  let gmPair = GMPair.load(gm1.id);
   gmPair.gm2 = gm2.id;
   gmPair.isCompleted = true;
   gmPair.save();
