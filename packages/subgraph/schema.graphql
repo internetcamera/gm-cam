@@ -1,15 +1,20 @@
 enum GMState {
-  FILM
   INITIATED
   COMPLETED
+}
+
+type GMFilm @entity {
+  id: ID!
+  expiresAt: BigInt!
+  owner: Wallet!
 }
 
 type GM @entity {
   id: ID!
   expiresAt: BigInt!
   ipfsHash: String
-  originalOwner: Wallet!
-  currentOwner: Wallet!
+  sender: Wallet!
+  recipient: Wallet!
   partner: GM
   state: GMState!
   createdAt: BigInt
@@ -18,13 +23,13 @@ type GM @entity {
 type GMPair @entity {
   id: ID!
   gm1: GM!
-  wallet1: Wallet!
   gm2: GM
-  wallet2: Wallet
   isCompleted: Boolean!
 }
 
 type Wallet @entity {
   id: ID!
-  gms: [GM!]! @derivedFrom(field: "currentOwner")
+  film: [GMFilm!]! @derivedFrom(field: "owner")
+  gmsRecieved: [GM!]! @derivedFrom(field: "recipient")
+  gmsSent: [GM!]! @derivedFrom(field: "sender")
 }

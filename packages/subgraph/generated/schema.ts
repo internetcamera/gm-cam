@@ -12,6 +12,55 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
+export class GMFilm extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save GMFilm entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save GMFilm entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("GMFilm", id.toString(), this);
+  }
+
+  static load(id: string): GMFilm | null {
+    return store.get("GMFilm", id) as GMFilm | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get expiresAt(): BigInt {
+    let value = this.get("expiresAt");
+    return value.toBigInt();
+  }
+
+  set expiresAt(value: BigInt) {
+    this.set("expiresAt", Value.fromBigInt(value));
+  }
+
+  get owner(): string {
+    let value = this.get("owner");
+    return value.toString();
+  }
+
+  set owner(value: string) {
+    this.set("owner", Value.fromString(value));
+  }
+}
+
 export class GM extends Entity {
   constructor(id: string) {
     super();
@@ -68,22 +117,22 @@ export class GM extends Entity {
     }
   }
 
-  get originalOwner(): string {
-    let value = this.get("originalOwner");
+  get sender(): string {
+    let value = this.get("sender");
     return value.toString();
   }
 
-  set originalOwner(value: string) {
-    this.set("originalOwner", Value.fromString(value));
+  set sender(value: string) {
+    this.set("sender", Value.fromString(value));
   }
 
-  get currentOwner(): string {
-    let value = this.get("currentOwner");
+  get recipient(): string {
+    let value = this.get("recipient");
     return value.toString();
   }
 
-  set currentOwner(value: string) {
-    this.set("currentOwner", Value.fromString(value));
+  set recipient(value: string) {
+    this.set("recipient", Value.fromString(value));
   }
 
   get partner(): string | null {
@@ -169,15 +218,6 @@ export class GMPair extends Entity {
     this.set("gm1", Value.fromString(value));
   }
 
-  get wallet1(): string {
-    let value = this.get("wallet1");
-    return value.toString();
-  }
-
-  set wallet1(value: string) {
-    this.set("wallet1", Value.fromString(value));
-  }
-
   get gm2(): string | null {
     let value = this.get("gm2");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -192,23 +232,6 @@ export class GMPair extends Entity {
       this.unset("gm2");
     } else {
       this.set("gm2", Value.fromString(value as string));
-    }
-  }
-
-  get wallet2(): string | null {
-    let value = this.get("wallet2");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set wallet2(value: string | null) {
-    if (value === null) {
-      this.unset("wallet2");
-    } else {
-      this.set("wallet2", Value.fromString(value as string));
     }
   }
 
@@ -252,12 +275,30 @@ export class Wallet extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get gms(): Array<string> {
-    let value = this.get("gms");
+  get film(): Array<string> {
+    let value = this.get("film");
     return value.toStringArray();
   }
 
-  set gms(value: Array<string>) {
-    this.set("gms", Value.fromStringArray(value));
+  set film(value: Array<string>) {
+    this.set("film", Value.fromStringArray(value));
+  }
+
+  get gmsRecieved(): Array<string> {
+    let value = this.get("gmsRecieved");
+    return value.toStringArray();
+  }
+
+  set gmsRecieved(value: Array<string>) {
+    this.set("gmsRecieved", Value.fromStringArray(value));
+  }
+
+  get gmsSent(): Array<string> {
+    let value = this.get("gmsSent");
+    return value.toStringArray();
+  }
+
+  set gmsSent(value: Array<string>) {
+    this.set("gmsSent", Value.fromStringArray(value));
   }
 }
