@@ -91,10 +91,10 @@ describe('GmCam', function () {
       .eventually.fulfilled;
 
     await expect(await gmCamContract.filmBalances(addresses[0])).to.equal(
-      99 + 5
+      99 + 2
     ); // FILM
     await expect(await gmCamContract.balanceOf(addresses[0])).to.equal(1); // ERC721
-    await expect(await gmCamContract.filmBalances(addresses[1])).to.equal(5); // FILM
+    await expect(await gmCamContract.filmBalances(addresses[1])).to.equal(2); // FILM
     await expect(await gmCamContract.balanceOf(addresses[1])).to.equal(1); // ERC721
 
     await expect(
@@ -160,7 +160,7 @@ describe('GmCam', function () {
   });
 
   it('shouldnt allow address to overspend', async function () {
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 2; i++) {
       await expect(
         gmCamContract
           .connect(accounts[1])

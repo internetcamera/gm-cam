@@ -113,8 +113,8 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         gmData[senderGmTokenId].isCompleted = true;
         emit GMCompleted(senderGmTokenId, _tokenIdCounter);
 
-        // send 5 gms to each player
-        for (uint256 i = 0; i < 5; i++) {
+        // send 2 gms to each player
+        for (uint256 i = 0; i < 2; i++) {
             _tokenIdCounter++;
             gmData[_tokenIdCounter].originalOwner = player1;
             gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
