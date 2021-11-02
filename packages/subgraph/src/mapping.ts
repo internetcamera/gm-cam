@@ -41,14 +41,18 @@ export function handleGMCreated(event: GMCreated): void {
   // gm.ipfsHash = gmData.value3;
 
   // Get image hash
-  let metadata = ipfs.cat(gmData.value3.slice(7));
+  let metadata = ipfs.cat(gmData.value3);
   if (metadata != null) {
     let value = json.fromBytes(metadata as Bytes);
 
     if (!value.isNull()) {
       let object = value.toObject();
 
-      gm.ipfsHash = object.get("image").toString();
+      if (object.get("image")) {
+        gm.ipfsHash = object.get("image").toString();
+      } else {
+        gm.ipfsHash = "no image key";
+      }
     }
   }
 
@@ -81,7 +85,21 @@ export function handleGMCompleted(event: GMCompleted): void {
   gm2.recipient = gm2Recipient.id;
   gm2.expiresAt = gm2Data.value1;
   gm2.partner = gm1.id;
-  gm2.ipfsHash = gm2Data.value3;
+  // Get image hash
+  let metadata = ipfs.cat(gm2Data.value3);
+  if (metadata != null) {
+    let value = json.fromBytes(metadata as Bytes);
+
+    if (!value.isNull()) {
+      let object = value.toObject();
+
+      if (object.get("image")) {
+        gm2.ipfsHash = object.get("image").toString();
+      } else {
+        gm2.ipfsHash = "no image key";
+      }
+    }
+  }
   gm2.createdAt = event.block.timestamp;
   gm2.state = "COMPLETED";
   gm2.save();

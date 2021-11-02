@@ -6,9 +6,9 @@ dataSources:
     name: GmCam
     network: mumbai
     source:
-      address: "0x7b827eE577C8DcEC6da71fBf759B8B13cBf8f809"
+      address: "0x1D07cCef68E10eE4D48687CAb7B96e16F7a2cc8f"
       abi: GmCam
-      startBlock: 20799517
+      startBlock: 20926573
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
