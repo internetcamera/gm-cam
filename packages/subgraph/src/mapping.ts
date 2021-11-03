@@ -1,12 +1,13 @@
-import { BigInt } from '@graphprotocol/graph-ts';
-import { store } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes, ipfs, json } from "@graphprotocol/graph-ts";
+import { store } from "@graphprotocol/graph-ts";
 import {
   GmCam,
   FilmCreated,
   GMCreated,
-  GMCompleted
-} from '../generated/GmCam/GmCam';
-import { GM, GMFilm, GMPair, Wallet } from '../generated/schema';
+  GMCompleted,
+  GMBurned,
+} from "../generated/GmCam/GmCam";
+import { GM, GMFilm, GMPair, Wallet } from "../generated/schema";
 
 export function handleFilmCreated(event: FilmCreated): void {
   let gmFilm = new GMFilm(event.params.tokenId.toString());
@@ -19,7 +20,7 @@ export function handleFilmCreated(event: FilmCreated): void {
 }
 
 export function handleGMCreated(event: GMCreated): void {
-  store.remove('GMFilm', event.params.tokenId.toString());
+  store.remove("GMFilm", event.params.tokenId.toString());
 
   let gm = new GM(event.params.tokenId.toString());
   let contract = GmCam.bind(event.address);
@@ -36,9 +37,28 @@ export function handleGMCreated(event: GMCreated): void {
   gm.recipient = recipient.id;
 
   gm.expiresAt = gmData.value1;
-  gm.ipfsHash = gmData.value3;
+
+  // TODO: tmp hack to keep subgraph working for non-metadata gm
+  // gm.ipfsHash = gmData.value3;
+
+  // Get image hash
+  let metadata = ipfs.cat(gmData.value3);
+  if (metadata != null) {
+    let value = json.fromBytes(metadata as Bytes);
+
+    if (!value.isNull()) {
+      let object = value.toObject();
+
+      if (object.get("image")) {
+        gm.ipfsHash = object.get("image").toString();
+      } else {
+        gm.ipfsHash = "no image key";
+      }
+    }
+  }
+
   gm.createdAt = event.block.timestamp;
-  gm.state = 'INITIATED';
+  gm.state = "INITIATED";
   gm.save();
 
   let gmPair = new GMPair(gm.id);
@@ -68,13 +88,27 @@ export function handleGMCompleted(event: GMCompleted): void {
   gm2.recipient = gm2Recipient.id;
   gm2.expiresAt = gm2Data.value1;
   gm2.partner = gm1.id;
-  gm2.ipfsHash = gm2Data.value3;
+  // Get image hash
+  let metadata = ipfs.cat(gm2Data.value3);
+  if (metadata != null) {
+    let value = json.fromBytes(metadata as Bytes);
+
+    if (!value.isNull()) {
+      let object = value.toObject();
+
+      if (object.get("image")) {
+        gm2.ipfsHash = object.get("image").toString();
+      } else {
+        gm2.ipfsHash = "no image key";
+      }
+    }
+  }
   gm2.createdAt = event.block.timestamp;
-  gm2.state = 'COMPLETED';
+  gm2.state = "COMPLETED";
   gm2.save();
 
   gm1.partner = gm2.id;
-  gm1.state = 'COMPLETED';
+  gm1.state = "COMPLETED";
   gm1.save();
 
   let gmPair = GMPair.load(gm1.id);
@@ -83,4 +117,10 @@ export function handleGMCompleted(event: GMCompleted): void {
   gmPair.isCompleted = true;
   gmPair.updatedAt = event.block.timestamp;
   gmPair.save();
+}
+
+export function handleGMBurned(event: GMBurned): void {
+  store.remove("GMFilm", event.params.tokenId.toString());
+  store.remove("GM", event.params.tokenId.toString());
+  store.remove("GMPair", event.params.tokenId.toString());
 }

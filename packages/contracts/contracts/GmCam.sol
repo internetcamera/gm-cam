@@ -27,25 +27,44 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         uint256 expiresAt
     );
     event GMCompleted(uint256 indexed gm1TokenId, uint256 indexed gm2TokenId);
+    event GMBurned(uint256 indexed tokenId);
 
     // * STORAGE * //
     uint256 private _tokenIdCounter;
     mapping(uint256 => TokenData) public gmData;
     mapping(address => uint256) public filmBalances;
+    bool private _canAirdrop;
 
     // * CONSTRUCTOR * //
     constructor(address trustedForwarderAddress_)
         ERC721("GMPhotos", "GM")
         TrustedForwarderRecipient(trustedForwarderAddress_)
     {
-        address msgSender = _msgSender();
-        for (uint256 i = 1; i <= 100; i++) {
-            gmData[i].originalOwner = msgSender;
-            gmData[i].expiresAt = block.timestamp + (100 * 365 days);
-            filmBalances[msgSender] += 1;
-            emit FilmCreated(gmData[i].originalOwner, i, gmData[i].expiresAt);
+        _tokenIdCounter = 0;
+        _canAirdrop = true;
+    }
+
+    function stopAirdrops() public onlyOwner {
+        _canAirdrop = false;
+    }
+
+    function airdrop(address[] calldata addrs) public onlyOwner {
+        require(_canAirdrop, "Airdropping has been stopped");
+
+        for (uint256 i = 0; i < addrs.length; i++) {
+            _tokenIdCounter++;
+            address addr = addrs[i];
+            gmData[_tokenIdCounter].originalOwner = addr;
+            gmData[_tokenIdCounter].expiresAt =
+                block.timestamp +
+                (100 * 365 days);
+            filmBalances[addr] += 1;
+            emit FilmCreated(
+                gmData[_tokenIdCounter].originalOwner,
+                i,
+                gmData[_tokenIdCounter].expiresAt
+            );
         }
-        _tokenIdCounter = 100;
     }
 
     // * PUBLIC GM FUNCTIONS * //
@@ -157,6 +176,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             ) {
                 gmData[tokenId].originalOwner = address(0);
                 if (_exists(tokenId)) _burn(tokenId);
+                emit GMBurned(tokenId);
             }
         }
     }

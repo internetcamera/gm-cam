@@ -6,9 +6,9 @@ dataSources:
     name: GmCam
     network: mumbai
     source:
-      address: '0xb8BaE5574317758ca80fFCF830C4C0Bb24193349'
+      address: "0x1D07cCef68E10eE4D48687CAb7B96e16F7a2cc8f"
       abi: GmCam
-      startBlock: 20799517
+      startBlock: 20926573
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -29,4 +29,6 @@ dataSources:
           handler: handleGMCreated
         - event: GMCompleted(indexed uint256,indexed uint256)
           handler: handleGMCompleted
+        - event: GMBurned(indexed uint256)
+          handler: handleGMBurned
       file: ./src/mapping.ts
