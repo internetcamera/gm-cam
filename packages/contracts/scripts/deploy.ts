@@ -132,9 +132,11 @@ async function start() {
       constructorArguments: [addressBook.forwarder],
     });
 
+    console.log("Airdropping....");
     const contract = GmCam__factory.connect(addressBook.gmCam, wallet);
     contract.airdrop(aidropAddrs);
     contract.stopAirdrops();
+    console.log("Airdrop complete");
   }
 
   console.log("Deployed!");
