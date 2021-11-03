@@ -116,4 +116,8 @@ export function handleGMCompleted(event: GMCompleted): void {
   gmPair.save();
 }
 
-export function handleGMBurned(event: GMBurned): void {}
+export function handleGMBurned(event: GMBurned): void {
+  store.remove("GMFilm", event.params.tokenId.toString());
+  store.remove("GM", event.params.tokenId.toString());
+  store.remove("GMPair", event.params.tokenId.toString());
+}
