@@ -88,6 +88,24 @@ export class FilmCreated__Params {
   }
 }
 
+export class GMBurned extends ethereum.Event {
+  get params(): GMBurned__Params {
+    return new GMBurned__Params(this);
+  }
+}
+
+export class GMBurned__Params {
+  _event: GMBurned;
+
+  constructor(event: GMBurned) {
+    this._event = event;
+  }
+
+  get tokenId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
 export class GMCompleted extends ethereum.Event {
   get params(): GMCompleted__Params {
     return new GMCompleted__Params(this);
@@ -349,6 +367,29 @@ export class GmCam extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
+  isTrustedForwarder(forwarder: Address): boolean {
+    let result = super.call(
+      "isTrustedForwarder",
+      "isTrustedForwarder(address):(bool)",
+      [ethereum.Value.fromAddress(forwarder)]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_isTrustedForwarder(forwarder: Address): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "isTrustedForwarder",
+      "isTrustedForwarder(address):(bool)",
+      [ethereum.Value.fromAddress(forwarder)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
   name(): string {
     let result = super.call("name", "name():(string)", []);
 
@@ -454,6 +495,29 @@ export class GmCam extends ethereum.SmartContract {
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toString());
   }
+
+  versionRecipient(): string {
+    let result = super.call(
+      "versionRecipient",
+      "versionRecipient():(string)",
+      []
+    );
+
+    return result[0].toString();
+  }
+
+  try_versionRecipient(): ethereum.CallResult<string> {
+    let result = super.tryCall(
+      "versionRecipient",
+      "versionRecipient():(string)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toString());
+  }
 }
 
 export class ConstructorCall extends ethereum.Call {
@@ -472,12 +536,46 @@ export class ConstructorCall__Inputs {
   constructor(call: ConstructorCall) {
     this._call = call;
   }
+
+  get trustedForwarderAddress_(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
 }
 
 export class ConstructorCall__Outputs {
   _call: ConstructorCall;
 
   constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+}
+
+export class AirdropCall extends ethereum.Call {
+  get inputs(): AirdropCall__Inputs {
+    return new AirdropCall__Inputs(this);
+  }
+
+  get outputs(): AirdropCall__Outputs {
+    return new AirdropCall__Outputs(this);
+  }
+}
+
+export class AirdropCall__Inputs {
+  _call: AirdropCall;
+
+  constructor(call: AirdropCall) {
+    this._call = call;
+  }
+
+  get addrs(): Array<Address> {
+    return this._call.inputValues[0].value.toAddressArray();
+  }
+}
+
+export class AirdropCall__Outputs {
+  _call: AirdropCall;
+
+  constructor(call: AirdropCall) {
     this._call = call;
   }
 }
@@ -754,6 +852,62 @@ export class SetApprovalForAllCall__Outputs {
   _call: SetApprovalForAllCall;
 
   constructor(call: SetApprovalForAllCall) {
+    this._call = call;
+  }
+}
+
+export class SetForwarderCall extends ethereum.Call {
+  get inputs(): SetForwarderCall__Inputs {
+    return new SetForwarderCall__Inputs(this);
+  }
+
+  get outputs(): SetForwarderCall__Outputs {
+    return new SetForwarderCall__Outputs(this);
+  }
+}
+
+export class SetForwarderCall__Inputs {
+  _call: SetForwarderCall;
+
+  constructor(call: SetForwarderCall) {
+    this._call = call;
+  }
+
+  get trustedForwarder_(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class SetForwarderCall__Outputs {
+  _call: SetForwarderCall;
+
+  constructor(call: SetForwarderCall) {
+    this._call = call;
+  }
+}
+
+export class StopAirdropsCall extends ethereum.Call {
+  get inputs(): StopAirdropsCall__Inputs {
+    return new StopAirdropsCall__Inputs(this);
+  }
+
+  get outputs(): StopAirdropsCall__Outputs {
+    return new StopAirdropsCall__Outputs(this);
+  }
+}
+
+export class StopAirdropsCall__Inputs {
+  _call: StopAirdropsCall;
+
+  constructor(call: StopAirdropsCall) {
+    this._call = call;
+  }
+}
+
+export class StopAirdropsCall__Outputs {
+  _call: StopAirdropsCall;
+
+  constructor(call: StopAirdropsCall) {
     this._call = call;
   }
 }

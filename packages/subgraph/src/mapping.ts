@@ -5,6 +5,7 @@ import {
   FilmCreated,
   GMCreated,
   GMCompleted,
+  GMBurned,
 } from "../generated/GmCam/GmCam";
 import { GM, GMFilm, GMPair, Wallet } from "../generated/schema";
 
@@ -114,3 +115,5 @@ export function handleGMCompleted(event: GMCompleted): void {
   gmPair.isCompleted = true;
   gmPair.save();
 }
+
+export function handleGMBurned(event: GMBurned): void {}
