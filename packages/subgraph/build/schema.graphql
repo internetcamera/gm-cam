@@ -26,6 +26,8 @@ type GMPair @entity {
   gm2: GM
   wallets: [Wallet!]!
   isCompleted: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
 }
 
 type Wallet @entity {

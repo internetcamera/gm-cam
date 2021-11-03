@@ -44,6 +44,8 @@ export function handleGMCreated(event: GMCreated): void {
   let gmPair = new GMPair(gm.id);
   gmPair.gm1 = gm.id;
   gmPair.isCompleted = false;
+  gmPair.createdAt = event.block.timestamp;
+  gmPair.updatedAt = event.block.timestamp;
   gmPair.wallets = [sender.id, recipient.id];
   gmPair.save();
 }
@@ -79,5 +81,6 @@ export function handleGMCompleted(event: GMCompleted): void {
   gmPair.gm2 = gm2.id;
   gmPair.wallets = [gm1.sender, gm2.sender];
   gmPair.isCompleted = true;
+  gmPair.updatedAt = event.block.timestamp;
   gmPair.save();
 }

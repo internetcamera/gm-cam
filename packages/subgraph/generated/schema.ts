@@ -252,6 +252,24 @@ export class GMPair extends Entity {
   set isCompleted(value: boolean) {
     this.set("isCompleted", Value.fromBoolean(value));
   }
+
+  get createdAt(): BigInt {
+    let value = this.get("createdAt");
+    return value.toBigInt();
+  }
+
+  set createdAt(value: BigInt) {
+    this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get updatedAt(): BigInt {
+    let value = this.get("updatedAt");
+    return value.toBigInt();
+  }
+
+  set updatedAt(value: BigInt) {
+    this.set("updatedAt", Value.fromBigInt(value));
+  }
 }
 
 export class Wallet extends Entity {
