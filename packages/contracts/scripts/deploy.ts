@@ -127,6 +127,7 @@ async function start() {
     await fs.writeFile(addressesPath, JSON.stringify(addressBook, null, 2));
 
     console.log("Verifying contract...");
+    await deployTx.deployTransaction.wait(5);
     await hre.run("verify:verify", {
       address: addressBook.gmCam,
       constructorArguments: [addressBook.forwarder],
@@ -134,8 +135,11 @@ async function start() {
 
     console.log("Airdropping....");
     const contract = GmCam__factory.connect(addressBook.gmCam, wallet);
-    contract.airdrop(aidropAddrs);
-    contract.stopAirdrops();
+    const drop = await contract.airdrop(aidropAddrs);
+    console.log(drop.hash);
+    // console.log(drop.)
+    drop.wait(2);
+    // contract.stopAirdrops();
     console.log("Airdrop complete");
   }
 
