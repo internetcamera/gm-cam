@@ -27,6 +27,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         uint256 expiresAt
     );
     event GMCompleted(uint256 indexed gm1TokenId, uint256 indexed gm2TokenId);
+    event GMBurned(uint256 indexed tokenId);
 
     // * STORAGE * //
     uint256 private _tokenIdCounter;
@@ -175,6 +176,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             ) {
                 gmData[tokenId].originalOwner = address(0);
                 if (_exists(tokenId)) _burn(tokenId);
+                GMBurned(tokenId);
             }
         }
     }
