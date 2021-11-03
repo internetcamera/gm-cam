@@ -176,7 +176,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             ) {
                 gmData[tokenId].originalOwner = address(0);
                 if (_exists(tokenId)) _burn(tokenId);
-                GMBurned(tokenId);
+                emit GMBurned(tokenId);
             }
         }
     }
