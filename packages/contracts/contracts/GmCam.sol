@@ -39,14 +39,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         ERC721("GMPhotos", "GM")
         TrustedForwarderRecipient(trustedForwarderAddress_)
     {
-        address msgSender = _msgSender();
-        // for (uint256 i = 1; i <= 100; i++) {
-        //     gmData[i].originalOwner = msgSender;
-        //     gmData[i].expiresAt = block.timestamp + (100 * 365 days);
-        //     filmBalances[msgSender] += 1;
-        //     emit FilmCreated(gmData[i].originalOwner, i, gmData[i].expiresAt);
-        // }
-        _tokenIdCounter = 1;
+        _tokenIdCounter = 0;
         _canAirdrop = true;
     }
 
@@ -54,13 +47,23 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         _canAirdrop = false;
     }
 
-    function airdropTo(address addr) public onlyOwner {
-        require(_canAirdrop, "Cannot airdrop");
-        gmData[i].originalOwner = addr;
-        gmData[i].expiresAt = block.timestamp + (100 * 365 days);
-        filmBalances[addr] += 1;
-        _tokenIdCounter += 1;
-        emit FilmCreated(gmData[i].originalOwner, i, gmData[i].expiresAt);
+    function airdrop(address[] calldata addrs) public onlyOwner {
+        require(_canAirdrop, "Airdropping has been stopped");
+
+        for (uint256 i = 0; i < addrs.length; i++) {
+            _tokenIdCounter++;
+            address addr = addrs[i];
+            gmData[_tokenIdCounter].originalOwner = addr;
+            gmData[_tokenIdCounter].expiresAt =
+                block.timestamp +
+                (100 * 365 days);
+            filmBalances[addr] += 1;
+            emit FilmCreated(
+                gmData[_tokenIdCounter].originalOwner,
+                i,
+                gmData[_tokenIdCounter].expiresAt
+            );
+        }
     }
 
     // * PUBLIC GM FUNCTIONS * //
