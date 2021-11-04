@@ -136,7 +136,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         for (uint256 i = 0; i < 2; i++) {
             _tokenIdCounter++;
             gmData[_tokenIdCounter].originalOwner = player1;
-            gmData[_tokenIdCounter].expiresAt = block.timestamp + 30 minutes;
+            gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
             filmBalances[player1] += 1;
             emit FilmCreated(
                 player1,
@@ -145,7 +145,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             );
             _tokenIdCounter++;
             gmData[_tokenIdCounter].originalOwner = player2;
-            gmData[_tokenIdCounter].expiresAt = block.timestamp + 30 minutes;
+            gmData[_tokenIdCounter].expiresAt = block.timestamp + 1 days;
             filmBalances[player2] += 1;
             emit FilmCreated(
                 player2,
