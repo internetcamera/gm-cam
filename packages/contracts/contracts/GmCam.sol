@@ -9,11 +9,11 @@ import "./utils/TrustedForwarderRecipient.sol";
 contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     // * MODELS * //
     struct TokenData {
-        address originalOwner; // this allows sendGMBack to send back to the original owner
+        address originalOwner;
         uint256 expiresAt;
-        uint256 partnerTokenId; // player1 <-> player2
+        uint256 partnerTokenId;
         string ipfsHash;
-        bool isCompleted; // tokenUri will be conditional on this
+        bool isCompleted;
     }
     event FilmCreated(
         address indexed player,
@@ -33,6 +33,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     uint256 private _tokenIdCounter;
     mapping(uint256 => TokenData) public gmData;
     mapping(address => uint256) public filmBalances;
+    mapping(address => bool) private _unsubscribed;
     bool private _canAirdrop;
 
     // * CONSTRUCTOR * //
@@ -89,6 +90,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             gmData[gmTokenId].expiresAt > block.timestamp,
             "this film is expired"
         );
+        require(_unsubscribed[to] != true, "recipient has unsubscribed");
 
         gmData[gmTokenId].ipfsHash = ipfsHash;
         gmData[gmTokenId].expiresAt = block.timestamp + 1 days;
@@ -116,6 +118,10 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             gmData[senderGmTokenId].expiresAt > block.timestamp,
             "this film is expired"
         );
+        require(
+            _unsubscribed[gmData[senderGmTokenId].originalOwner] != true,
+            "recipient has unsubscribed"
+        );
 
         address player1 = gmData[senderGmTokenId].originalOwner;
         address player2 = msgSender;
@@ -132,7 +138,6 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         gmData[senderGmTokenId].isCompleted = true;
         emit GMCompleted(senderGmTokenId, _tokenIdCounter);
 
-        // send 2 gms to each player
         for (uint256 i = 0; i < 2; i++) {
             _tokenIdCounter++;
             gmData[_tokenIdCounter].originalOwner = player1;
@@ -155,6 +160,10 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         }
     }
 
+    function setSubscriptionState(bool subscribed) public {
+        _unsubscribed[_msgSender()] = subscribed;
+    }
+
     // * ERC721 OVERRIDES * //
     function tokenURI(uint256 tokenId)
         public
@@ -164,8 +173,6 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     {
         return string(abi.encodePacked("ipfs://", gmData[tokenId].ipfsHash));
     }
-
-    // TODO?: override beforeTokenTransfer to update originalOwner ?
 
     function burnExpired(uint256[] calldata tokenIds) public onlyOwner {
         for (uint256 i = 0; i < tokenIds.length; i++) {
