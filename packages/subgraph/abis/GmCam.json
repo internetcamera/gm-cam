@@ -551,6 +551,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "subscribed",
+        "type": "bool"
+      }
+    ],
+    "name": "setSubscriptionState",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "stopAirdrops",
     "outputs": [],

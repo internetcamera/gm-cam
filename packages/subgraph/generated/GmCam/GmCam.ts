@@ -886,6 +886,36 @@ export class SetForwarderCall__Outputs {
   }
 }
 
+export class SetSubscriptionStateCall extends ethereum.Call {
+  get inputs(): SetSubscriptionStateCall__Inputs {
+    return new SetSubscriptionStateCall__Inputs(this);
+  }
+
+  get outputs(): SetSubscriptionStateCall__Outputs {
+    return new SetSubscriptionStateCall__Outputs(this);
+  }
+}
+
+export class SetSubscriptionStateCall__Inputs {
+  _call: SetSubscriptionStateCall;
+
+  constructor(call: SetSubscriptionStateCall) {
+    this._call = call;
+  }
+
+  get subscribed(): boolean {
+    return this._call.inputValues[0].value.toBoolean();
+  }
+}
+
+export class SetSubscriptionStateCall__Outputs {
+  _call: SetSubscriptionStateCall;
+
+  constructor(call: SetSubscriptionStateCall) {
+    this._call = call;
+  }
+}
+
 export class StopAirdropsCall extends ethereum.Call {
   get inputs(): StopAirdropsCall__Inputs {
     return new StopAirdropsCall__Inputs(this);
