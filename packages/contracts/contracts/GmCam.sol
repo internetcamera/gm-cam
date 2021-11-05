@@ -43,6 +43,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     );
     event GMCompleted(uint256 indexed gm1TokenId, uint256 indexed gm2TokenId);
     event GMBurned(uint256 indexed tokenId);
+    event AddressUnsubscribed(address indexed addr);
 
     // * STORAGE * //
     uint256 private _tokenIdCounter;
@@ -177,6 +178,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
 
     function setSubscriptionState(bool subscribed) public {
         _unsubscribed[_msgSender()] = subscribed;
+        emit AddressUnsubscribed(_msgSender());
     }
 
     // * ERC721 OVERRIDES * //
@@ -189,6 +191,25 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
         return string(abi.encodePacked("ipfs://", gmData[tokenId].ipfsHash));
     }
 
+    function burnUnsubscribed(uint256[] calldata tokenIds, address addr)
+        public
+        onlyOwner
+    {
+        require(
+            _unsubscribed[addr] == true,
+            "recipient must unsubscribe to burn their tokens"
+        );
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            if (ownerOf(tokenId) == addr) {
+                gmData[tokenId].originalOwner = address(0);
+                gmData[tokenId].ipfsHash = "";
+                if (_exists(tokenId)) _burn(tokenId);
+                emit GMBurned(tokenId);
+            }
+        }
+    }
+
     function burnExpired(uint256[] calldata tokenIds) public onlyOwner {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
@@ -197,6 +218,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
                 gmData[tokenId].isCompleted != true
             ) {
                 gmData[tokenId].originalOwner = address(0);
+                gmData[tokenId].ipfsHash = "";
                 if (_exists(tokenId)) _burn(tokenId);
                 emit GMBurned(tokenId);
             }

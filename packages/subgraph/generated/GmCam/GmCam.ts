@@ -10,6 +10,24 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class AddressUnsubscribed extends ethereum.Event {
+  get params(): AddressUnsubscribed__Params {
+    return new AddressUnsubscribed__Params(this);
+  }
+}
+
+export class AddressUnsubscribed__Params {
+  _event: AddressUnsubscribed;
+
+  constructor(event: AddressUnsubscribed) {
+    this._event = event;
+  }
+
+  get addr(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
 export class Approval extends ethereum.Event {
   get params(): Approval__Params {
     return new Approval__Params(this);
@@ -640,6 +658,40 @@ export class BurnExpiredCall__Outputs {
   _call: BurnExpiredCall;
 
   constructor(call: BurnExpiredCall) {
+    this._call = call;
+  }
+}
+
+export class BurnUnsubscribedCall extends ethereum.Call {
+  get inputs(): BurnUnsubscribedCall__Inputs {
+    return new BurnUnsubscribedCall__Inputs(this);
+  }
+
+  get outputs(): BurnUnsubscribedCall__Outputs {
+    return new BurnUnsubscribedCall__Outputs(this);
+  }
+}
+
+export class BurnUnsubscribedCall__Inputs {
+  _call: BurnUnsubscribedCall;
+
+  constructor(call: BurnUnsubscribedCall) {
+    this._call = call;
+  }
+
+  get tokenIds(): Array<BigInt> {
+    return this._call.inputValues[0].value.toBigIntArray();
+  }
+
+  get addr(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class BurnUnsubscribedCall__Outputs {
+  _call: BurnUnsubscribedCall;
+
+  constructor(call: BurnUnsubscribedCall) {
     this._call = call;
   }
 }
