@@ -8,7 +8,8 @@
     "build:contracts": "yarn compile && yarn typechain",
     "build:package": "rm -rf ./dist && tsc && cp typechain/*.d.ts dist/typechain && cp -R addresses dist && cp -R artifacts/contracts dist/artifacts && cp -R contracts dist",
     "deploy-local": "ts-node scripts/deploy.ts --chainId 1337 && cp -R addresses dist",
-    "deploy-mumbai": "ts-node scripts/deploy.ts --chainId 80001 && cp -R addresses dist"
+    "deploy-mumbai": "ts-node scripts/deploy.ts --chainId 80001 && cp -R addresses dist",
+    "deploy-polygon": "ts-node scripts/deploy.ts --chainId 137 && cp -R addresses dist"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
