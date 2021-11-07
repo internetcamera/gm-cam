@@ -51,6 +51,8 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
     mapping(address => uint256) public filmBalances;
     mapping(address => bool) private _unsubscribed;
     bool private _canAirdrop;
+    uint256 private MAX_PAIRS_SUPPLY = 4444;
+    uint256 private _pairCount;
 
     // * CONSTRUCTOR * //
     constructor(address trustedForwarderAddress_)
@@ -138,6 +140,7 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
             _unsubscribed[gmData[senderGmTokenId].originalOwner] != true,
             "recipient has unsubscribed"
         );
+        require(_pairCount < MAX_PAIRS_SUPPLY, "max gms reached");
 
         address player1 = gmData[senderGmTokenId].originalOwner;
         address player2 = msgSender;
@@ -174,6 +177,14 @@ contract GmCam is ERC721, Ownable, TrustedForwarderRecipient {
                 gmData[_tokenIdCounter].expiresAt
             );
         }
+
+        _pairCount++;
+    }
+
+    function deleteGM(uint256 tokenId) public onlyOwner {
+        if (_exists(tokenId)) _burn(tokenId);
+        gmData[tokenId].ipfsHash = "";
+        emit GMBurned(tokenId);
     }
 
     function setSubscriptionState(bool subscribed) public {

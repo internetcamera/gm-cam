@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: GmCam
-    network: mumbai
+    network: matic
     source:
-      address: "0x9c36aFFfc5c7F5d33a33D814Cb652265182726d3"
+      address: '0x72d5ed437BcF231c9D4A8F4439A6BAdb3FD617BB'
       abi: GmCam
       startBlock: 21089040
     mapping:
