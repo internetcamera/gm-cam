@@ -6,7 +6,7 @@ dataSources:
     name: GmCam
     network: matic
     source:
-      address: "0x72d5ed437BcF231c9D4A8F4439A6BAdb3FD617BB"
+      address: "0x8577C1944b72152d489f5270E6e610B43D2d7F9f"
       abi: GmCam
       startBlock: 21089040
     mapping:
